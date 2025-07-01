@@ -146,7 +146,7 @@
 #
 #logging:
 #  level:
-#    profit.login.jwt: DEBUG
+#    profit.arcadia.jwt: DEBUG
 #
 #server:
 #  port: 8080
