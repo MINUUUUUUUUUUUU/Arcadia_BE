@@ -1,81 +1,13 @@
 package profit.arcadia.user.service;
 
-import org.springframework.stereotype.Service;
-import profit.arcadia.user.dto.ChangeUserDto;
 import profit.arcadia.user.domain.User;
-import profit.arcadia.user.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import profit.arcadia.user.dto.ChangeUserDto;
 
-import java.util.Optional;
+public interface UserService  {
 
-@Service
-public class UserService {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    User getUserInfo(Long userId);
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    User updateUser(Long userId, ChangeUserDto changeUserDto);
 
-
-    public User getUserInfo(Long userId) {
-        Optional<User> optionalUser = userRepository.findById(userId);
-        if (optionalUser.isEmpty()) {
-            throw new IllegalArgumentException("유저를 찾을 수 없습니다. userId: " + userId);
-        }
-
-        return optionalUser.get();
-    }
-
-    public User updateUser(Long userId, ChangeUserDto changeUserDto) {
-        // 유저 정보 조회
-        Optional<User> optionalUser = userRepository.findById(userId);
-        if (optionalUser.isEmpty()) {
-            throw new IllegalArgumentException("유저를 찾을 수 없습니다. userId: " + userId);
-        }
-
-        User user = optionalUser.get();
-
-//        // 비밀번호 변경
-//        if (changeUserDto.getNewPassword() != null && !changeUserDto.getNewPassword().isEmpty()) {
-//            user.setPassword(changeUserDto.getNewPassword());
-//        }
-
-        // 닉네임 변경
-        if (changeUserDto.getFullName() != null && !changeUserDto.getFullName().isEmpty()) {
-            user.setFullName(changeUserDto.getFullName());
-        }
-
-        // 전화번호 변경
-        if (changeUserDto.getPhone() != null && !changeUserDto.getPhone().isEmpty()) {
-            user.setPhone(changeUserDto.getPhone());
-        }
-
-        // 생년월일 변경
-        if (changeUserDto.getBirth() != null && !changeUserDto.getBirth().isEmpty()) {
-            user.setBirth(changeUserDto.getBirth());
-        }
-
-        // 한줄 소개 변경
-        if (changeUserDto.getDescription() != null && !changeUserDto.getDescription().isEmpty()) {
-            user.setDescription(changeUserDto.getDescription());
-        }
-
-        // 변경된 유저 정보 저장
-        return userRepository.save(user);
-    }
-
-    public void changePassword(User user, String newPassword) {
-        // 새로운 비밀번호를 암호화
-        String encodedPassword = passwordEncoder.encode(newPassword);
-
-        // 사용자의 비밀번호를 변경
-        user.setPassword(encodedPassword);
-
-        // 변경된 사용자 정보를 저장
-        userRepository.save(user);
-    }
-
-
+    void changePassword(User user, String newPassword);
 }

@@ -9,26 +9,26 @@ import profit.arcadia.user.dto.ChangeUserDto;
 import profit.arcadia.user.dto.UpdatePasswordDto;
 import profit.arcadia.user.domain.User;
 import profit.arcadia.user.repository.UserRepository;
-import profit.arcadia.user.service.UserService;
+import profit.arcadia.user.service.impl.UserServiceImpl;
 
 
 @RequestMapping("/users")
 @RestController
 public class UserController {
 
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
     private final UserRepository userRepository;
 
     @Autowired
-    public UserController(UserService userService, UserRepository userRepository) {
-        this.userService = userService;
+    public UserController(UserServiceImpl userServiceImpl, UserRepository userRepository) {
+        this.userServiceImpl = userServiceImpl;
         this.userRepository = userRepository;
     }
 
     // 유저 정보 조회 API
     @GetMapping("/read/{userId}")
     public ResponseEntity<User> getUserInfo(@PathVariable Long userId) {
-        User userInfo = userService.getUserInfo(userId);
+        User userInfo = userServiceImpl.getUserInfo(userId);
         return ResponseEntity.ok(userInfo);
     }
     @PutMapping("/update/{userId}")
@@ -36,7 +36,7 @@ public class UserController {
             @PathVariable Long userId,
             @RequestBody ChangeUserDto changeUserDto) {
 
-        User updatedUser = userService.updateUser(userId, changeUserDto);
+        User updatedUser = userServiceImpl.updateUser(userId, changeUserDto);
         return ResponseEntity.ok(updatedUser);
     }
 
@@ -47,7 +47,7 @@ public class UserController {
         User user = userRepository.findByEmail(email).get();
 
 
-        userService.changePassword(user, updatePasswordDto.getNewPassword());
+        userServiceImpl.changePassword(user, updatePasswordDto.getNewPassword());
         return ResponseEntity.ok("Password updated successfully");
     }
 

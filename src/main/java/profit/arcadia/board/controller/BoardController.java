@@ -23,7 +23,7 @@ import profit.arcadia.board.service.impl.BoardServiceImpl;
 import profit.arcadia.board.service.impl.LikeServiceImpl;
 import profit.arcadia.board.service.impl.CommentServiceImpl;
 import profit.arcadia.user.repository.UserRepository;
-import profit.arcadia.auth.service.AuthenticationService;
+import profit.arcadia.auth.service.impl.AuthenticationServiceImpl;
 
 import java.io.IOException;
 
@@ -37,7 +37,7 @@ public class BoardController {
     private final LikeServiceImpl likeServiceImpl;
     private final CommentServiceImpl commentServiceImpl;
 
-    private final AuthenticationService authenticationService;
+    private final AuthenticationServiceImpl authenticationServiceImpl;
     private final UserRepository userRepository;
 
 

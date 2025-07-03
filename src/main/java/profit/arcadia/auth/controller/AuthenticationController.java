@@ -19,8 +19,8 @@ import profit.arcadia.auth.dto.LoginUserDto;
 import profit.arcadia.auth.dto.RegisterUserDto;
 import profit.arcadia.user.domain.User;
 import profit.arcadia.auth.dto.response.LoginTokenResponse;
-import profit.arcadia.auth.service.AuthenticationService;
-import profit.arcadia.notification.service.EmailService;
+import profit.arcadia.auth.service.impl.AuthenticationServiceImpl;
+import profit.arcadia.notification.service.impl.EmailServiceImpl;
 import profit.arcadia.auth.service.JwtService;
 import profit.arcadia.auth.service.TokenRedisService;
 
@@ -38,21 +38,21 @@ public class AuthenticationController {
     private final UserDetailsService userDetailsService;
     private final TokenRedisService tokenRedisService;
 
-    private final AuthenticationService authenticationService;
+    private final AuthenticationServiceImpl authenticationServiceImpl;
 
-    private final EmailService emailService;
+    private final EmailServiceImpl emailServiceImpl;
 
-    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService, UserDetailsService userDetailsService, TokenRedisService tokenRedisService, EmailService emailService) {
+    public AuthenticationController(JwtService jwtService, AuthenticationServiceImpl authenticationServiceImpl, UserDetailsService userDetailsService, TokenRedisService tokenRedisService, EmailServiceImpl emailServiceImpl) {
         this.jwtService = jwtService;
-        this.authenticationService = authenticationService;
+        this.authenticationServiceImpl = authenticationServiceImpl;
         this.userDetailsService = userDetailsService;
         this.tokenRedisService = tokenRedisService;
-        this.emailService = emailService;
+        this.emailServiceImpl = emailServiceImpl;
     }
 
     @PostMapping("/signup")
     public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto) {
-        User registeredUser = authenticationService.signup(registerUserDto);
+        User registeredUser = authenticationServiceImpl.signup(registerUserDto);
         return ResponseEntity.ok(registeredUser);
     }
 
@@ -60,7 +60,7 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginTokenResponse> authenticate(@RequestBody LoginUserDto loginUserDto, HttpServletResponse response) {
-        User authenticatedUser = authenticationService.authenticate(loginUserDto);
+        User authenticatedUser = authenticationServiceImpl.authenticate(loginUserDto);
 
         String accessToken = jwtService.generateToken(authenticatedUser);
         String refreshToken = jwtService.generateRefreshToken(authenticatedUser);
@@ -133,7 +133,7 @@ public class AuthenticationController {
     @PostMapping("/sign-up/emailCheck")
     public ResponseEntity<Map<String, String>> emailCheck(@RequestBody EmailCheckReq emailCheckReq) throws MessagingException, UnsupportedEncodingException {
         log.info(emailCheckReq.getEmail());
-        String authCode = emailService.sendEmail(emailCheckReq.getEmail());
+        String authCode = emailServiceImpl.sendEmail(emailCheckReq.getEmail());
         String email = emailCheckReq.getEmail();
         log.info("getEmail: " + email);
         log.info("authCode: " + authCode);
@@ -169,7 +169,7 @@ public class AuthenticationController {
         log.info("Email: " + email);
         String password = registerUserDto.getPassword();
         log.info("password: " + password);
-        authenticationService.deleteUser(email, password);
+        authenticationServiceImpl.deleteUser(email, password);
         Map<String, String> response = new HashMap<>();
         response.put("message", "User deleted successfully");
         return ResponseEntity.ok(response);
