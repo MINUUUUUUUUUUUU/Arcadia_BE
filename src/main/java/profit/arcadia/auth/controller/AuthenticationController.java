@@ -18,7 +18,7 @@ import profit.arcadia.auth.dto.EmailCheckReq;
 import profit.arcadia.auth.dto.LoginUserDto;
 import profit.arcadia.auth.dto.RegisterUserDto;
 import profit.arcadia.user.domain.User;
-import profit.arcadia.response.LoginResponse;
+import profit.arcadia.auth.dto.response.LoginTokenResponse;
 import profit.arcadia.auth.service.AuthenticationService;
 import profit.arcadia.notification.service.EmailService;
 import profit.arcadia.auth.service.JwtService;
@@ -59,7 +59,7 @@ public class AuthenticationController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto, HttpServletResponse response) {
+    public ResponseEntity<LoginTokenResponse> authenticate(@RequestBody LoginUserDto loginUserDto, HttpServletResponse response) {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
 
         String accessToken = jwtService.generateToken(authenticatedUser);
@@ -78,7 +78,7 @@ public class AuthenticationController {
         // 쿠키를 응답에 추가
         response.addCookie(accessTokenCookie);
 
-        LoginResponse loginResponse = new LoginResponse();
+        LoginTokenResponse loginResponse = new LoginTokenResponse();
         loginResponse.setAccestoken(accessToken);
         loginResponse.setRefreshtoken(refreshToken);
         loginResponse.setExpiresIn(jwtService.getExpirationTime());

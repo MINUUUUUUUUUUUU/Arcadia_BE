@@ -5,10 +5,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @RequiredArgsConstructor
-@Component
+@Service
 public class NaverOAuth2UserUnlink implements OAuth2UserUnlink {
 
     private static final String URL = "https://nid.naver.com/oauth2.0/token";

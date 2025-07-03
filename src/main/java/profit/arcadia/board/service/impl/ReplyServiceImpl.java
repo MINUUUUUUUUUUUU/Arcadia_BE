@@ -1,0 +1,115 @@
+package profit.arcadia.board.service.impl;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import profit.arcadia.board.service.ReplyService;
+import profit.arcadia.user.domain.User;
+import profit.arcadia.user.domain.UserRole;
+import profit.arcadia.board.Entity.Board;
+import profit.arcadia.board.Entity.Reply;
+import profit.arcadia.board.dto.BoardContentDto;
+import profit.arcadia.board.dto.ReplyCreateRequest;
+import profit.arcadia.board.repository.BoardDocumentRepository;
+import profit.arcadia.board.repository.BoardRepository;
+import profit.arcadia.board.repository.ReplyRepository;
+import profit.arcadia.user.repository.UserRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+//댓글 관련 CRUD
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class ReplyServiceImpl implements ReplyService {
+
+    private final ReplyRepository replyRepository;
+    private final BoardRepository boardRepository;
+    private final UserRepository userRepository;
+    private final BoardDocumentRepository boardDocumentRepository;
+
+    @Override
+    public void writeReply(Long boardId, ReplyCreateRequest req, String email) {
+        Board board = boardRepository.findById(boardId).get();
+        User user = userRepository.findByEmail(email).get();
+        Reply reply = replyRepository.save(req.toEntity(board, user, user.getNickname()));
+
+        BoardContentDto bcd = new BoardContentDto();
+        bcd = boardDocumentRepository.save(bcd.init(req.getBody()));
+        reply.setDocumentId(bcd.getId());
+
+        replyRepository.save(reply);
+    }
+
+    @Override
+    public List<Reply> findAll(Long boardId) {
+        return replyRepository.findAllByBoardId(boardId);
+    }
+
+    @Override
+    @Transactional
+    public Long editReply(Long replyId, String newBody, String email) {
+        Optional<Reply> optReply = replyRepository.findById(replyId);
+        Optional<User> optUser = userRepository.findByEmail(email);
+
+        if (optReply.isEmpty() || optUser.isEmpty() || !optReply.get().getUser().equals(optUser.get())) {
+            return null;
+        }
+
+        Reply reply = optReply.get();
+        reply.update(newBody);
+
+        return reply.getBoard().getId();
+    }
+
+    @Override
+    public Long deleteReply(Long replyId, String email) {
+        Optional<Reply> optReply = replyRepository.findById(replyId);
+        Optional<User> optUser = userRepository.findByEmail(email);
+
+        if (optReply.isEmpty() || optUser.isEmpty() ||
+            (!optReply.get().getUser().equals(optUser.get()) &&
+                !optUser.get().getUserRole().equals(UserRole.NORMAL))) {
+            return null;
+        }
+
+        Reply reply = optReply.get();
+        Board board = reply.getBoard();
+
+        replyRepository.delete(reply);
+        boardDocumentRepository.deleteById(reply.getDocumentId());
+
+        return board.getId();
+    }
+
+    @Override
+    public List<Reply> getReplyByBoardId(Long boardId) {
+        return replyRepository.findAllByBoardId(boardId);
+    }
+
+    @Override
+    @Transactional
+    public void selectReply(Long replyId, String email) {
+        Optional<Reply> optReply = replyRepository.findById(replyId);
+        if (optReply.isEmpty()) {
+            throw new IllegalArgumentException("답글이 존재하지 않습니다.");
+        }
+
+        Reply reply = optReply.get();
+        if (!reply.getBoard().getUser().getEmail().equals(email)) {
+            throw new IllegalArgumentException("작성자만 답변을 채택할 수 있습니다.");
+        }
+
+        Integer customPoints = reply.getBoard().getPoint();
+
+        reply.select();
+        User user = reply.getUser();
+        log.info("user: {}", user);
+        user.addPoints(customPoints);
+        log.info("user points: {}", user.getPoints());
+
+        userRepository.save(user);
+    }
+}

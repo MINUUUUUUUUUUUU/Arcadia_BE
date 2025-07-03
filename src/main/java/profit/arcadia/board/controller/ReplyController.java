@@ -15,9 +15,9 @@ import profit.arcadia.board.repository.ReplyRepository;
 import profit.arcadia.board.response.ReplyReadResponse;
 import profit.arcadia.board.response.ReplySelectResponse;
 import profit.arcadia.board.response.ReplyWriteResponse;
-import profit.arcadia.board.service.BoardService;
-import profit.arcadia.board.service.CommentService;
-import profit.arcadia.board.service.ReplyService;
+import profit.arcadia.board.service.impl.BoardServiceImpl;
+import profit.arcadia.board.service.impl.CommentServiceImpl;
+import profit.arcadia.board.service.impl.ReplyServiceImpl;
 import profit.arcadia.user.repository.UserRepository;
 
 import java.io.IOException;
@@ -30,9 +30,9 @@ import java.util.List;
 @Slf4j
 public class ReplyController {
 
-    private final CommentService commentService;
-    private final BoardService boardService;
-    private final ReplyService replyService;
+    private final CommentServiceImpl commentServiceImpl;
+    private final BoardServiceImpl boardServiceImpl;
+    private final ReplyServiceImpl replyServiceImpl;
     private final UserRepository userRepository;
     private final ReplyRepository replyRepository;
 
@@ -43,7 +43,7 @@ public class ReplyController {
                                                            Authentication authentication) throws IOException {
 
         // 댓글 작성 서비스 호출
-        replyService.writeReply(boardId, req, authentication.getName());
+        replyServiceImpl.writeReply(boardId, req, authentication.getName());
 
         String email = authentication.getName();
         User user = userRepository.findByEmail(email).get();
@@ -61,7 +61,7 @@ public class ReplyController {
 
         // 응답 메시지와 다음 URL 설정
         String message = "답글이 추가되었습니다.";
-        String nextUrl = "/boards/" + boardService.getCategory(boardId) + "/" + boardId;
+        String nextUrl = "/boards/" + boardServiceImpl.getCategory(boardId) + "/" + boardId;
 
         // 응답 객체 생성
         ReplyWriteResponse response = ReplyWriteResponse.builder()
@@ -81,7 +81,7 @@ public class ReplyController {
     @PostMapping("/{replyId}/edit")
     public ResponseEntity<ReplyWriteResponse> editReply(@PathVariable Long replyId, @RequestBody ReplyCreateRequest req,
                                                             Authentication authentication) {
-        Long boardId = replyService.editReply(replyId, req.getBody(), authentication.getName());
+        Long boardId = replyServiceImpl.editReply(replyId, req.getBody(), authentication.getName());
 
         String message;
         String nextUrl;
@@ -90,7 +90,7 @@ public class ReplyController {
             nextUrl = "/";
         } else {
             message = "답글이 수정 되었습니다.";
-            nextUrl = "/boards/" + boardService.getCategory(boardId) + "/" + boardId;
+            nextUrl = "/boards/" + boardServiceImpl.getCategory(boardId) + "/" + boardId;
         }
 
         ReplyWriteResponse response = ReplyWriteResponse.builder()
@@ -105,7 +105,7 @@ public class ReplyController {
      // 답변 삭제
     @GetMapping("/{replyId}/delete")
     public ResponseEntity<ReplyWriteResponse> deleteComment(@PathVariable Long replyId, Authentication authentication) {
-        Long boardId = replyService.deleteReply(replyId, authentication.getName());
+        Long boardId = replyServiceImpl.deleteReply(replyId, authentication.getName());
 
 
 
@@ -116,7 +116,7 @@ public class ReplyController {
             nextUrl = "/";
         } else {
             message = "댓글이 삭제 되었습니다.";
-            nextUrl = "/boards/" + boardService.getCategory(boardId) + "/" + boardId;
+            nextUrl = "/boards/" + boardServiceImpl.getCategory(boardId) + "/" + boardId;
         }
 
         ReplyWriteResponse response = ReplyWriteResponse.builder()
@@ -129,7 +129,7 @@ public class ReplyController {
 
     @GetMapping ("/{boardId}/read")
     public ResponseEntity<ReplyReadResponse> getReplyByBoardId(@PathVariable Long boardId, Authentication authentication){
-        List<Reply> reply = replyService.getReplyByBoardId(boardId);
+        List<Reply> reply = replyServiceImpl.getReplyByBoardId(boardId);
 
         String email = authentication.getName();
         User user = userRepository.findByEmail(email).get();
@@ -163,12 +163,12 @@ public class ReplyController {
         Reply reply = replyRepository.findById(replyId).get();
 
         if(reply.isSelected() == false){
-            replyService.selectReply(replyId, authentication.getName());
+            replyServiceImpl.selectReply(replyId, authentication.getName());
             boolean selected = true;
 
             ReplySelectResponse response = ReplySelectResponse.builder()
                     .message("답변이 채택되었습니다.")
-                    .nextUrl("/boards/" + boardService.getCategory(replyId) + "/" + replyId)
+                    .nextUrl("/boards/" + boardServiceImpl.getCategory(replyId) + "/" + replyId)
                     .selected(selected)
                     .build();
 
@@ -179,7 +179,7 @@ public class ReplyController {
             ReplySelectResponse response = ReplySelectResponse.builder()
                     .message("이미 채택되었습니다.")
                     .selected(selected)
-                    .nextUrl("/boards/" + boardService.getCategory(replyId) + "/" + replyId)
+                    .nextUrl("/boards/" + boardServiceImpl.getCategory(replyId) + "/" + replyId)
                     .build();
 
             return ResponseEntity.ok(response);

@@ -7,6 +7,7 @@ spring:
 
   main:
     allow-bean-definition-overriding: true
+    lazy-initialization: true
 
   mvc:
     pathmatch:

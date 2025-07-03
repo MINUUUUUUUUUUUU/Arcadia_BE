@@ -14,7 +14,7 @@ import profit.arcadia.board.dto.BoardDto;
 import profit.arcadia.board.repository.BoardRepository;
 import profit.arcadia.board.response.LikedBoardListResponse;
 import profit.arcadia.board.response.UserPostsResponse;
-import profit.arcadia.board.service.BoardService;
+import profit.arcadia.board.service.impl.BoardServiceImpl;
 import profit.arcadia.board.repository.LikeRepository;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class MyPageController {
 
     private final LikeRepository likeRepository;
     private final BoardRepository boardRepository;
-    private final BoardService boardService;
+    private final BoardServiceImpl boardServiceImpl;
 
     @GetMapping("/liked-boards/{userId}")
     public ResponseEntity<?> getLikedBoards(@PathVariable Long userId) {

@@ -23,7 +23,8 @@ spring:
         format_sql: true
     defer-datasource-initialization: true
     hibernate:
-      ddl-auto: create
+#      ddl-auto: create
+      ddl-auto: update
     open-in-view: true
 
   data:
@@ -44,16 +45,6 @@ spring:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
 
-  cloud:
-    aws:
-      region:
-        static: us-east-1
-      credentials:
-        access-key: dummy
-        secret-key: dummy
-      s3:
-        bucket: local-bucket
-
   security:
     oauth2:
       client:
@@ -63,7 +54,7 @@ spring:
             client-secret: dummy
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
+            redirect-uri: "${BASE_URL:}/login/oauth2/code/​${registrationId}"
             scope:
               - name
               - email
@@ -74,7 +65,7 @@ spring:
             client-secret: dummy
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
+            redirect-uri: "${BASE_URL:}/login/oauth2/code/​${registrationId}"
             scope:
               - profile_nickname
               - profile_image
@@ -93,3 +84,23 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-info-authentication-method: header
             user-name-attribute: id
+
+# application build만을 위해 임시 작성
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      credentials:
+        access-key: dummy
+        secret-key: dummy
+
+aws:
+  s3:
+    accessKey: local
+    secretKey: local
+    endpoint: http://localhost:9000
+app:
+  s3:
+    bucket: local
+
+

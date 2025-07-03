@@ -15,14 +15,13 @@ import profit.arcadia.board.dto.BoardSearchRequest;
 import profit.arcadia.user.domain.User;
 import profit.arcadia.user.domain.UserRole;
 import profit.arcadia.board.Entity.Board;
-import profit.arcadia.question_board.dto.*;
 import profit.arcadia.board.response.BoardListResponse;
 import profit.arcadia.board.response.ErrorResponse;
 import profit.arcadia.board.Entity.BoardCategory;
 import profit.arcadia.board.response.BoardWriteResponse;
-import profit.arcadia.board.service.BoardService;
-import profit.arcadia.board.service.LikeService;
-import profit.arcadia.board.service.CommentService;
+import profit.arcadia.board.service.impl.BoardServiceImpl;
+import profit.arcadia.board.service.impl.LikeServiceImpl;
+import profit.arcadia.board.service.impl.CommentServiceImpl;
 import profit.arcadia.user.repository.UserRepository;
 import profit.arcadia.auth.service.AuthenticationService;
 
@@ -34,9 +33,9 @@ import java.io.IOException;
 @Slf4j
 public class BoardController {
 
-    private final BoardService boardService;
-    private final LikeService likeService;
-    private final CommentService commentService;
+    private final BoardServiceImpl boardServiceImpl;
+    private final LikeServiceImpl likeServiceImpl;
+    private final CommentServiceImpl commentServiceImpl;
 
     private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
@@ -69,7 +68,7 @@ public class BoardController {
             }
         }
 
-        Page<Board> boards = boardService.getBoardList(boardCategory, pageRequest, searchType, keyword);
+        Page<Board> boards = boardServiceImpl.getBoardList(boardCategory, pageRequest, searchType, keyword);
         log.info("board's title: " + boards);
         BoardSearchRequest boardSearchRequest = new BoardSearchRequest(sortType, searchType, keyword);
 
@@ -77,23 +76,6 @@ public class BoardController {
 
         return ResponseEntity.ok(response);
     }
-
-//    @GetMapping("/{category}/write")
-//    public ResponseEntity<BoardWritePageResponse> boardWritePage(@PathVariable String category) {
-//        BoardCategory boardCategory = BoardCategory.of(category);
-//        // BoardCreateRequest를 사용하여 BoardWritePageResponse를 생성합니다.
-//        BoardCreateRequest boardCreateRequest = new BoardCreateRequest();
-//        if (boardCategory == null) {
-//            return ResponseEntity.badRequest()
-//                    .body(new BoardWritePageResponse("카테고리가 존재하지 않습니다.", boardCreateRequest));
-//        }
-//
-//
-//
-//        // 생성된 BoardCreateRequest를 사용하여 BoardWritePageResponse를 생성합니다.
-//        BoardWritePageResponse response = new BoardWritePageResponse(category, boardCreateRequest);
-//        return ResponseEntity.ok(response);
-//    }
 
 
     //게시물 작성
@@ -118,7 +100,7 @@ public class BoardController {
                     .build());
         }
 
-        Long savedBoardId = boardService.writeBoard(req, boardCategory, authentication.getName(), authentication);
+        Long savedBoardId = boardServiceImpl.writeBoard(req, boardCategory, authentication.getName(), authentication);
         //log.info("auth.getname(): "+ authentication.getName());
         String email = authentication.getName();
         User user = userRepository.findByEmail(email).get();
@@ -161,7 +143,7 @@ public class BoardController {
         @GetMapping("/read/{category}/{boardId}")
         @ResponseBody
         public BoardDto boardDetailPage(@PathVariable String category, @PathVariable Long boardId) {
-            BoardDto boardDto = boardService.getBoard(boardId, category);
+            BoardDto boardDto = boardServiceImpl.getBoard(boardId, category);
             if (boardDto == null) {
                 // 게시글이 존재하지 않는 경우 null 반환 또는 적절한 에러 처리
                 return null;
@@ -176,7 +158,7 @@ public class BoardController {
                                                     ) throws IOException {
 
 
-        Long editedBoardId = boardService.editBoard(boardId, category, boardDto);
+        Long editedBoardId = boardServiceImpl.editBoard(boardId, category, boardDto);
 
         if (editedBoardId == null) {
             return ResponseEntity.badRequest().body(BoardWriteResponse.builder()
@@ -215,7 +197,7 @@ public class BoardController {
                     .build());
         }
 
-        Long deletedBoardId = boardService.deleteBoard(boardId, category);
+        Long deletedBoardId = boardServiceImpl.deleteBoard(boardId, category);
 
         String message;
         String nextUrl;

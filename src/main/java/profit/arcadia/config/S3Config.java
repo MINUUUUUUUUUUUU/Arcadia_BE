@@ -8,6 +8,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import java.net.URI;
+import software.amazon.awssdk.services.s3.S3ClientBuilder;
 
 @Configuration
 public class S3Config {
@@ -21,15 +22,36 @@ public class S3Config {
     @Value("${app.s3.bucket}")
     private String bucketName;
 
+//    @Bean
+//    public S3Client s3Client() {
+//        return S3Client.builder()
+//                .endpointOverride(URI.create(s3Endpoint))  // MinIO 주소
+//                .region(Region.US_EAST_1)  // 아무거나, MinIO는 검증 안함
+//                .credentialsProvider(StaticCredentialsProvider.create(
+//                        AwsBasicCredentials.create(s3AccessKey, s3SecretKey)
+//                ))
+//                .build();
+//    }
+
     @Bean
     public S3Client s3Client() {
-        return S3Client.builder()
-                .endpointOverride(URI.create(s3Endpoint))  // MinIO 주소
-                .region(Region.US_EAST_1)  // 아무거나, MinIO는 검증 안함
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(s3AccessKey, s3SecretKey)
-                ))
-                .build();
+        S3ClientBuilder builder = S3Client.builder()
+            .region(Region.US_EAST_1) // MinIO는 Region 검증하지 않으므로 임의 설정
+
+            .credentialsProvider(
+                StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(s3AccessKey, s3SecretKey)
+                )
+            );
+
+        // MinIO 같은 커스텀 엔드포인트가 설정된 경우에만 override
+        if (s3Endpoint != null && !s3Endpoint.isBlank()) {
+            URI endpointUri = URI.create(s3Endpoint);
+            builder.endpointOverride(endpointUri)
+                .forcePathStyle(true); // MinIO는 path-style 필요
+        }
+
+        return builder.build();
     }
 
     @Bean

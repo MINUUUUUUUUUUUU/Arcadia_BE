@@ -13,8 +13,8 @@ import profit.arcadia.board.dto.CommentCreateRequest;
 import profit.arcadia.board.repository.CommentRepository;
 import profit.arcadia.board.response.CommentReadResponse;
 import profit.arcadia.board.response.CommentWriteResponse;
-import profit.arcadia.board.service.BoardService;
-import profit.arcadia.board.service.CommentService;
+import profit.arcadia.board.service.impl.BoardServiceImpl;
+import profit.arcadia.board.service.impl.CommentServiceImpl;
 import profit.arcadia.user.repository.UserRepository;
 
 import java.io.IOException;
@@ -26,8 +26,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommentController {
 
-    private final CommentService commentService;
-    private final BoardService boardService;
+    private final CommentServiceImpl commentServiceImpl;
+    private final BoardServiceImpl boardServiceImpl;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
 
@@ -37,7 +37,7 @@ public class CommentController {
             Authentication authentication) throws IOException {
 
         // 댓글 작성 서비스 호출
-        commentService.writeComment(boardId, req, authentication.getName());
+        commentServiceImpl.writeComment(boardId, req, authentication.getName());
 
         String email = authentication.getName();
         User user = userRepository.findByEmail(email).get();
@@ -57,7 +57,7 @@ public class CommentController {
 
         // 응답 메시지와 다음 URL 설정
         String message = "댓글이 추가되었습니다.";
-        String nextUrl = "/boards/" + boardService.getCategory(boardId) + "/" + boardId;
+        String nextUrl = "/boards/" + boardServiceImpl.getCategory(boardId) + "/" + boardId;
 
         // 응답 객체 생성
         CommentWriteResponse response = CommentWriteResponse.builder()
@@ -77,7 +77,7 @@ public class CommentController {
     public ResponseEntity<CommentWriteResponse> editComment(@PathVariable Long commentId,
             @RequestBody CommentCreateRequest req,
             Authentication authentication) {
-        Long boardId = commentService.editComment(commentId, req.getBody(), authentication.getName());
+        Long boardId = commentServiceImpl.editComment(commentId, req.getBody(), authentication.getName());
 
         String email = authentication.getName();
         User user = userRepository.findByEmail(email).get();
@@ -91,7 +91,7 @@ public class CommentController {
             nextUrl = "/";
         } else {
             message = "댓글이 수정 되었습니다.";
-            nextUrl = "/boards/" + boardService.getCategory(boardId) + "/" + boardId;
+            nextUrl = "/boards/" + boardServiceImpl.getCategory(boardId) + "/" + boardId;
         }
 
         CommentWriteResponse response = CommentWriteResponse.builder()
@@ -107,7 +107,7 @@ public class CommentController {
     @GetMapping("/{commentId}/delete")
     public ResponseEntity<CommentWriteResponse> deleteComment(@PathVariable Long commentId,
             Authentication authentication) {
-        Long boardId = commentService.deleteComment(commentId, authentication.getName());
+        Long boardId = commentServiceImpl.deleteComment(commentId, authentication.getName());
 
         String message;
         String nextUrl;
@@ -116,7 +116,7 @@ public class CommentController {
             nextUrl = "/";
         } else {
             message = "댓글이 삭제 되었습니다.";
-            nextUrl = "/boards/" + boardService.getCategory(boardId) + "/" + boardId;
+            nextUrl = "/boards/" + boardServiceImpl.getCategory(boardId) + "/" + boardId;
         }
 
         CommentWriteResponse response = CommentWriteResponse.builder()
@@ -129,7 +129,7 @@ public class CommentController {
 
     @GetMapping("/{boardId}/read")
     public ResponseEntity<CommentReadResponse> getCommentsByBoardId(@PathVariable Long boardId, Authentication authentication) {
-        List<Comment> comments = commentService.getCommentsByBoardId(boardId);
+        List<Comment> comments = commentServiceImpl.getCommentsByBoardId(boardId);
 
         String email = authentication.getName();
         User user = userRepository.findByEmail(email).get();
